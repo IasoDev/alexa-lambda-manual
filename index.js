@@ -39,16 +39,20 @@ var handlers = {
         this.emit(':ask', speechOutput, reprompt);
     },
     'AMAZON.CancelIntent': function () {
-        speechOutput = 'Drücke den Knopf oder sage meinen Namen Alexa, wenn du wieder Hilfe benötigst!';
-        this.emit(':tell', speechOutput);
+        speechOutput = ["Drücke den Knopf, wenn du wieder Hilfe benötigst","Wenn du Hilfe benötigst, kannst du einfach auf den Knopf drücken",
+                        "Wenn du Hilfe vom Pflegepersonal benötigst, betätige den Knopf und formuliere deine Anfrage","Drücke den Knopf oder sage meinen Namen Alexa, wenn du wieder Hilfe benötigst!"];
+        var speechOutputRandomized=randomPhrase(speechOutput);                
+        this.emit(':tell', speechOutputRandomized);
     },
     'AMAZON.StopIntent': function () {
-        speechOutput = '';
-        this.emit(':tell', speechOutput);
+        speechOutput = ["Drücke den Knopf, wenn du wieder Hilfe benötigst","Wenn du Hilfe benötigst, kannst du einfach auf den Knopf drücken",
+                        "Wenn du Hilfe vom Pflegepersonal benötigst, betätige den Knopf und formuliere deine Anfrage","Drücke den Knopf oder sage meinen Namen Alexa, wenn du wieder Hilfe benötigst!"];
+        var speechOutputRandomized=randomPhrase(speechOutput);                
+        this.emit(':tell', speechOutputRandomized);
     },
     'AMAZON.YesIntent': function () {
         speechOutput = 'Das freut mich!';
-        this.emit(':ask', speechOutput);
+        this.emit(':tell', speechOutput);
         
     },
     'AMAZON.NoIntent': function () {
@@ -87,7 +91,7 @@ var handlers = {
         var input=["Ich habe deine Anfrage, dass du auf die Toilette musst, an den Pfleger weitergeleitet", "Der Pfleger kommt gleich, um dir zu helfen, auf die Toilette zu gehen","Der Pfleger weiß Bescheid, jedoch musst du leider noch einen kleinen Moment warten"];
         speechOutput=randomPhrase(input);
         var sicher=nachfrage();
-        this.emit(":ask", speechOutput, sicher);
+        this.emit(":ask",speechOutput,sicher);
     },
     "Bett": function () {
         var speechOutput;
@@ -105,18 +109,18 @@ var handlers = {
 
         //Your custom intent handling goes here
         var input=["Ich habe deine Anfrage, dass du deine Gehhilfe benötigst weitergeleitet", "Deine Gehhilfe wird die bald gebracht!",
-                    "Der Pfleger weiß Bescheid. Er wird die bald zur Hilfe kommen"];
+                    "Der Pfleger weiß Bescheid. Er wird dir bald zur Hilfe kommen"];
         
         speechOutput=randomPhrase(input);
-        this.emit(":ask", speechOutput, speechOutput);
+        this.emit(":tell", speechOutput, speechOutput);
     },
     "Notfall": function () {
         //sendSMS("Person X in Raum Y hat einen Notfall");
         var speechOutput;
         //any intent slot variables are listed here for convenience
-
+        var input=["Ich verbinde dich sofort mit dem Pfleger","Die Verbindung wird hergestellt"];
         //Your custom intent handling goes here
-        speechOutput = "Ich verbinde dich sofort mit dem Pfleger";
+        speechOutput = randomPhrase(input);
         this.emit(":ask", speechOutput, speechOutput);
     },
    "Verbindung_mit_Pfleger": function () {
@@ -131,8 +135,10 @@ var handlers = {
         }
         else if (PflegerSlotRaw == 'pfleger')
             speechOutput="Die Verbindung zum" +PflegerSlot+ "wird hergestellt";
-        else if (PflegerSlotRaw == 'arzt' || PflegerSlotRaw == 'ärztin')
-            speechOutput="Ich verbinde dich mit jemandem aus dem Pflegepersonal. Diese Person wird alles weitere mit dir besprechen";
+        else if (PflegerSlotRaw == 'arzt' || PflegerSlotRaw == 'ärztin'){
+            var input=["Ich verbinde dich mit jemandem aus dem Pflegepersonal. Diese Person wird alles weitere mit dir besprechen", "Die Verbindung zum Pflegerpersonal wird hergestellt. Sie werden die weiterhelfen"];
+            speechOutput=randomPhrase(input);
+        }
         else
             speechOutput="Die Verbindung zum Pflegepersonal wird aufgebaut";
         //Your custom intent handling goes here
@@ -203,8 +209,8 @@ function putDynamoItem(priority,content,callback) {
 }
 // Nachfrage Funktion
 function nachfrage(){
-    var nachfragen=["Habe ich dich richtig verstanden?","Ist das so richtig?"];
-    var zufall=randomPhrase(nachfrage);
+    var nachfragen=["Habe ich dich richtig verstanden?","Ist das richtig, wie ich es verstanden habe"];
+    var zufall=randomPhrase(nachfragen);
     return zufall; 
 }
 /*
