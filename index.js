@@ -28,6 +28,7 @@ const AWSregion = 'eu-west-1';
 var APP_ID =  "amzn1.ask.skill.f6c652ad-92b8-4c79-a29a-3bd683d582ed";
 var userId;
 var speechOutput = '';
+var anfrage = new Object();
 var handlers = {
     'LaunchRequest': function () {
     speechOutput=randomPhrase(welcomeOutput);
@@ -51,13 +52,30 @@ var handlers = {
         this.emit(':tell', speechOutputRandomized);
     },
     'AMAZON.YesIntent': function () {
-        speechOutput = 'Das freut mich!';
-        this.emit(':tell', speechOutput);
-        
+        if (anfrage.inhalt == "Notfall"){
+            putDynamoItem(anfrage.prioritaet,anfrage.inhalt, ()=>{
+            speechOutput = "Der Notfall wurde an den Pfleger weitergeleitet";
+            this.emit(":tell", speechOutput);
+            }); 
+        }
+        else {
+            putDynamoItem(anfrage.prioritaet,anfrage.inhalt, ()=>{
+            speechOutput = "Das freut mich!";
+            this.emit(":tell", speechOutput);
+            }); 
+        }
     },
     'AMAZON.NoIntent': function () {
-        speechOutput = 'Das tut mir sehr Leid, bitte wiederhole deine Anfrage!';
-        this.emit(':ask', speechOutput);
+        if (anfrage.inhalt == "Notfall"){
+            putDynamoItem("2","körperliche Probleme", ()=>{
+            speechOutput = "Dem Pfleger wurde mitgeteilt, dass Sie körperliche Probleme haben.";
+            this.emit(":tell", speechOutput);
+            }); 
+        }
+        else {
+            speechOutput = 'Das tut mir sehr Leid, bitte wiederhole deine Anfrage!';
+            this.emit(":ask", speechOutput, speechOutput);
+        }
     },
     'SessionEndedRequest': function () {
         speechOutput = '';
@@ -69,61 +87,109 @@ var handlers = {
         //any intent slot variables are listed here for convenience
 
         //Your custom intent handling goes here
-        speechOutput = "Ein Pfleger wird sich bald um dein Fenster oder Tür kümmern.";
-        this.emit(":ask", speechOutput, speechOutput);
+        var input = ["Ein Pfleger wird sich bald um dein Fenster oder Tür kümmern.","Ein Pfleger wird bald vorbeikommen, um sich um Ihre Tür oder Fenster zu kümmern."];
+        speechOutput=randomPhrase(input);
+        speechOutput+=" "+nachfrage();
+        anfrage.inhalt="Fenster oder Tür";
+        anfrage.prioritaet="3";
+        this.emit(":ask",speechOutput);
     },
     "Medikamente": function () {
         var speechOutput = "";
+        var input="";
         //any intent slot variables are listed here for convenience
         var MedizinSlotRaw = this.event.request.intent.slots.Medizin.value;
-        console.log(MedizinSlotRaw);
+        console.log(MedizinSlot);
         var MedizinSlot = resolveCanonical(this.event.request.intent.slots.Medizin);
         console.log(MedizinSlot);
-        //Your custom intent handling goes here
-        speechOutput = "Ein Pfleger wird dir deine Medikamente bringen";
-        this.emit(":ask", speechOutput, speechOutput);
+        if (MedizinSlotRaw == 'hustensaft' || MedizinSlotRaw == 'trank' || MedizinSlotRaw == 'zaubertrank' ) {
+            input=["Ein Pfleger wird Ihnen Ihren" +MedizinSlot+ "bringen.","Ihr" +MedizinSlot+ "wird Ihnen bald gebracht.","Der" +MedizinSlot+ "wird gleich gebracht."];    
+            speechOutput=randomPhrase(input);
+            speechOutput+=" "+nachfrage();
+            var capitalized=firstCap(MedizinSlotRaw);
+            anfrage.inhalt=capitalized;
+            anfrage.prioritaet="2";
+            this.emit(":ask",speechOutput);
+        }
+        else if (MedizinSlotRaw == 'pille' || MedizinSlotRaw == 'tablette' || MedizinSlotRaw == 'kapsel' || MedizinSlotRaw == 'arznei'){
+            input=["Ein Pfleger wird Ihnen Ihre " +MedizinSlotRaw+ " bringen.","Ihre " +MedizinSlotRaw+ " wird Ihnen bald gebracht.","Die " +MedizinSlotRaw+ " wird gleich gebracht."];    
+            speechOutput=randomPhrase(input);
+            speechOutput+=" "+nachfrage();
+            var capitalized=firstCap(MedizinSlotRaw);
+            anfrage.inhalt=capitalized;
+            anfrage.prioritaet="2";
+            this.emit(":ask",speechOutput);
+        }
+        else if (MedizinSlotRaw == 'schmerzmittel' || MedizinSlotRaw == 'aspirin' || MedizinSlotRaw == 'heilmittel' || MedizinSlotRaw == 'arzneimittel' || MedizinSlotRaw == 'therapeutikum'){
+            input=["Ein Pfleger wird Ihnen Ihr" +MedizinSlotRaw+ "bringen.","Ihr" +MedizinSlotRaw+ "wird Ihnen bald gebracht.","Das" +MedizinSlotRaw+ "wird gleich gebracht."];
+            speechOutput=randomPhrase(input);
+            speechOutput+=" "+nachfrage();
+            var capitalized=firstCap(MedizinSlotRaw);
+            anfrage.inhalt=capitalized;
+            anfrage.prioritaet="2";
+            this.emit(":ask",speechOutput);
+        }
+        else {
+            input=["Ein Pfleger wird Ihnen Ihre Medikamente bringen.","Ihre Medizin wird Ihnen bald gebracht.","Die Medizin wird gleich gebracht."]; 
+            speechOutput=randomPhrase(input);
+            speechOutput+=" "+nachfrage();
+            anfrage.inhalt="Medizin";
+            anfrage.prioritaet="2";
+            this.emit(":ask",speechOutput);
+        }
+        
     },
     "Toilette": function () {
         var speechOutput;
         //any intent slot variables are listed here for convenience
 
         //Your custom intent handling goes here
-        var input=["Ich habe deine Anfrage, dass du auf die Toilette musst, an den Pfleger weitergeleitet", "Der Pfleger kommt gleich, um dir zu helfen, auf die Toilette zu gehen","Der Pfleger weiß Bescheid, jedoch musst du leider noch einen kleinen Moment warten"];
+        var input=["Ich habe Ihre Anfrage, dass Sie auf die Toilette müssen, an den Pfleger weitergeleitet.","Der Pfleger weiß Bescheid, dass Sie auf die Toilette müssen.",
+                    "Ein Pfleger wird bald da sein, um Ihnen zu helfen, auf die Toilette zu gehen."];
         speechOutput=randomPhrase(input);
-        var sicher=nachfrage();
-        this.emit(":ask",speechOutput,sicher);
+        speechOutput+=" "+nachfrage();
+        anfrage.inhalt="Toilette";
+        anfrage.prioritaet="1";
+        this.emit(":ask",speechOutput);
     },
     "Bett": function () {
         var speechOutput;
         //any intent slot variables are listed here for convenience
 
         //Your custom intent handling goes here
-        var input=["Ich habe deine Anfrage, dass du das Bett verlassen möchtest, an den Pfleger weitergeleitet", "Der Pfleger kommt gleich, um dir zu helfen, aus dem Bett zu kommen",
-            "Der Pfleger weiß Bescheid, jedoch musst du leider noch einen kleinen Moment warten"];
+        var input=["Ich habe deine Anfrage, dass du das Bett verlassen möchtest, an den Pfleger weitergeleitet.", "Der Pfleger kommt gleich, um dir zu helfen, aus dem Bett zu kommen.",
+                    "Der Pfleger weiß Bescheid. Er wird bald vorbeikommen, um Ihnen aus dem Bett zu helfen."];
         speechOutput=randomPhrase(input);
-        this.emit(":ask", speechOutput, speechOutput);
+        speechOutput+=" "+nachfrage();
+        anfrage.inhalt="Bett verlassen";
+        anfrage.prioritaet="2";
+        this.emit(":ask",speechOutput);
     },
     "Bewegungshilfe": function () {
         var speechOutput;
         //any intent slot variables are listed here for convenience
 
         //Your custom intent handling goes here
-        var input=["Ich habe deine Anfrage, dass du deine Gehhilfe benötigst weitergeleitet", "Deine Gehhilfe wird die bald gebracht!",
-                    "Der Pfleger weiß Bescheid. Er wird dir bald zur Hilfe kommen"];
-        
+        var input=["Ich habe Ihre Anfrage, dass Sie Ihre Gehhilfe benötigen weitergeleitet.", "Ihre Gehhilfe wird Ihnen bald gebracht!.",
+                    "Der Pfleger weiß Bescheid. Er wird Ihnen bald Ihre Bewegungshilfe bringen."];
         speechOutput=randomPhrase(input);
-        this.emit(":tell", speechOutput, speechOutput);
+        speechOutput+=" "+nachfrage();
+        anfrage.inhalt="Gehhilfe";
+        anfrage.prioritaet="2";
+        this.emit(":ask",speechOutput);
     },
     "Notfall": function () {
         //sendSMS("Person X in Raum Y hat einen Notfall");
         var speechOutput;
         //any intent slot variables are listed here for convenience
-        var input=["Ich verbinde dich sofort mit dem Pfleger","Die Verbindung wird hergestellt"];
+        var input=["Ist es ein Notfall?"];
         //Your custom intent handling goes here
-        speechOutput = randomPhrase(input);
-        this.emit(":ask", speechOutput, speechOutput);
+        speechOutput=randomPhrase(input);
+        anfrage.inhalt="Notfall";
+        anfrage.prioritaet="1";
+        this.emit(":ask",speechOutput);
     },
-   "Verbindung_mit_Pfleger": function () {
+   /*"Verbindung_mit_Pfleger": function () {
         var speechOutput = "";
         //any intent slot variables are listed here for convenience
         var PflegerSlotRaw = this.event.request.intent.slots.Pfleger.value;
@@ -143,21 +209,26 @@ var handlers = {
             speechOutput="Die Verbindung zum Pflegepersonal wird aufgebaut";
         //Your custom intent handling goes here
         this.emit(":ask", speechOutput, speechOutput);
-    },  
+    }, */ 
     "Fernseher": function () {
         var speechOutput;
         //pushDynamoDB("low","Fernseher",this);
 		//var request = {priority:"high",content:"Fernseher",time:"10:23"};
 		//this.attributes['request'] = request; 
 		//createItemDynamoDb("high","Fernseher");
-		putDynamoItem("high","Fernseher", ()=>{
-        speechOutput = "Ein Pfleger wird gleich hier sein, um dir mit deinem Fernseher zu helfen";
-        this.emit(":ask", speechOutput, speechOutput);
-        });
+		var input=["Ein Pfleger wird bald hier sein, um sich um den Fernseher zu kümmern.","Bald kommt jemand vorbei, um sich um Ihren Fernseher zu kümmern.",
+		            "Hilfe für Ihren Fernseher kommt bald."];
+		speechOutput=randomPhrase(input);
+        speechOutput+=" "+nachfrage();
+        anfrage.inhalt="Fernseher";
+        anfrage.prioritaet="3";
+        this.emit(":ask",speechOutput);
     },
     'Unhandled': function () {
-        speechOutput = "Ich habe leider nicht verstanden, wobei du Hilfe bnötigst. Ich verbinde dich direkt mit dem Pfleger";
-        this.emit(':ask', speechOutput, speechOutput);
+        putDynamoItem("1","Unknown", ()=>{
+            speechOutput = "Ich habe leider nicht verstanden, wobei Sie Hilfe benötigen. Der Pfleger weiß jedoch Bescheid, dass Sie Hilfe benötigen.";
+            this.emit(":tell", speechOutput);
+        });
     }
 };
 
@@ -207,12 +278,19 @@ function putDynamoItem(priority,content,callback) {
     });
 
 }
-// Nachfrage Funktion
+// request function
 function nachfrage(){
-    var nachfragen=["Habe ich dich richtig verstanden?","Ist das richtig, wie ich es verstanden habe"];
+    var nachfragen=["Habe ich dich richtig verstanden?","Ist das richtig, wie ich es verstanden habe?"];
     var zufall=randomPhrase(nachfragen);
     return zufall; 
 }
+
+// first letter of word capitalized
+function firstCap(string) 
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 /*
 function createItemDynamoDb(priority,content) {
 	var date = new Date();
