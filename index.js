@@ -14,7 +14,7 @@
  
 
 var reprompt;
-var welcomeOutput=['Willkommen! Wie kann ich dir helfen?', 'Hallo! Womit kann ich dir behilflich sein', 'Wobei brauchst du Hilfe']; 
+var welcomeOutput=['Willkommen! Wie kann ich dir helfen?', 'Hallo! Womit kann ich dir behilflich sein', 'Wobei brauchst du Hilfe','Sage mir, mit was ich dir helfen kann']; 
 //var welcomeReprompt = "Sage einfach, wobei dir der Pfleger helfen soll";
  // 2. Skill Code =======================================================================================================
 "use strict";
@@ -47,11 +47,12 @@ var handlers = {
         this.emit(':tell', speechOutput);
     },
     'AMAZON.YesIntent': function () {
-        speechOutput = 'Es wurde ja gesagt';
+        speechOutput = 'Das freut mich!';
         this.emit(':ask', speechOutput);
+        
     },
     'AMAZON.NoIntent': function () {
-        speechOutput = 'Es wurde Nein gesagt';
+        speechOutput = 'Das tut mir sehr Leid, bitte wiederhole deine Anfrage!';
         this.emit(':ask', speechOutput);
     },
     'SessionEndedRequest': function () {
@@ -84,8 +85,9 @@ var handlers = {
 
         //Your custom intent handling goes here
         var input=["Ich habe deine Anfrage, dass du auf die Toilette musst, an den Pfleger weitergeleitet", "Der Pfleger kommt gleich, um dir zu helfen, auf die Toilette zu gehen","Der Pfleger weiß Bescheid, jedoch musst du leider noch einen kleinen Moment warten"];
-        speechOutput=randomPhrase(input);    
-        this.emit(":ask", speechOutput, speechOutput);
+        speechOutput=randomPhrase(input);
+        var sicher=nachfrage();
+        this.emit(":ask", speechOutput, sicher);
     },
     "Bett": function () {
         var speechOutput;
@@ -98,23 +100,18 @@ var handlers = {
         this.emit(":ask", speechOutput, speechOutput);
     },
     "Bewegungshilfe": function () {
-        var speechOutput = "";
+        var speechOutput;
         //any intent slot variables are listed here for convenience
-        var GehhilfeSlotRaw = this.event.request.intent.slots.Gehhilfe.value;
-        console.log(GehhilfeSlotRaw);
-        var GehhilfeSlot = resolveCanonical(this.event.request.intent.slots.Gehhilfe);
-        console.log(GehhilfeSlot);
 
         //Your custom intent handling goes here
-        if (GehhilfeSlotRaw == 'Rollstuhl') {
-           speechOutput = "Ich habe deine Anfrage, dass du deinen " +GehhilfeSlotRaw+"benötigst an den Pfleger weitergeleitet"; 
-        }
-        else 
-            speechOutput = "Ich habe deine Anfrage, dass du deine " +GehhilfeSlotRaw+"benötigst an den Pfleger weitergeleitet";
+        var input=["Ich habe deine Anfrage, dass du deine Gehhilfe benötigst weitergeleitet", "Deine Gehhilfe wird die bald gebracht!",
+                    "Der Pfleger weiß Bescheid. Er wird die bald zur Hilfe kommen"];
+        
+        speechOutput=randomPhrase(input);
         this.emit(":ask", speechOutput, speechOutput);
     },
     "Notfall": function () {
-        sendSMS("Person X in Raum Y hat einen Notfall");
+        //sendSMS("Person X in Raum Y hat einen Notfall");
         var speechOutput;
         //any intent slot variables are listed here for convenience
 
@@ -203,6 +200,12 @@ function putDynamoItem(priority,content,callback) {
         }
     });
 
+}
+// Nachfrage Funktion
+function nachfrage(){
+    var nachfragen=["Habe ich dich richtig verstanden?","Ist das so richtig?"];
+    var zufall=randomPhrase(nachfrage);
+    return zufall; 
 }
 /*
 function createItemDynamoDb(priority,content) {
