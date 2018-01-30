@@ -60,7 +60,7 @@ var handlers = {
         }
         else {
             putDynamoItem(anfrage.prioritaet,anfrage.inhalt, ()=>{
-            var input = ["Das freut mich!","Super!","Wunderbar!"];
+            var input = ["Das freut mich!","Ok!","Sehr gut!"];
             var speechOutput=randomPhrase(input);
             this.emit(":tell", speechOutput);
             }); 
@@ -74,7 +74,8 @@ var handlers = {
             }); 
         }
         else {
-            speechOutput = 'Das tut mir sehr Leid, bitte wiederholen Sie Ihre Anfrage!';
+            var input=["Das tut mir sehr Leid, bitte wiederholen Sie Ihre Anfrage!","Bitte wiederholen Sie Ihre Anfrage!","ok. Bitte wiederholen Sie Ihr Problem."];
+            speechOutput = randomPhrase(input);
             this.emit(":ask", speechOutput, speechOutput);
         }
     },
@@ -112,7 +113,7 @@ var handlers = {
             anfrage.prioritaet="2";
             this.emit(":ask",speechOutput);
         }
-        else if (MedizinSlotRaw == 'pille' || MedizinSlotRaw == 'tablette' || MedizinSlotRaw == 'kapsel' || MedizinSlotRaw == 'arznei' || MedizinSlotRaw == 'ibuprofen'){
+        else if (MedizinSlotRaw == 'pille' || MedizinSlotRaw == 'tablette' || MedizinSlotRaw == 'arznei' || MedizinSlotRaw == 'ibuprofen'){
             input=["Ein Pfleger wird Ihnen Ihre " +MedizinSlotRaw+ " bringen.","Ihre " +MedizinSlotRaw+ " wird Ihnen bald gebracht.","Die " +MedizinSlotRaw+ " wird gleich gebracht."];    
             speechOutput=randomPhrase(input);
             speechOutput+=" "+nachfrage();
@@ -176,7 +177,7 @@ var handlers = {
         speechOutput=randomPhrase(input);
         speechOutput+=" "+nachfrage();
         anfrage.inhalt="Gehhilfe";
-        anfrage.prioritaet="2";
+        anfrage.prioritaet="3";
         this.emit(":ask",speechOutput);
     },
     "Notfall": function () {
