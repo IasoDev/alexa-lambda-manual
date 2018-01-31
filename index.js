@@ -3,15 +3,7 @@
 /* eslint-disable  func-names */
 /* eslint quote-props: ["error", "consistent"]*/
 
-// There are three sections, Text Strings, Skill Code, and Helper Function(s).
-// You can copy and paste the contents as the code for a new Lambda function, using the alexa-skill-kit-sdk-factskill template.
-// This code includes helper functions for compatibility with versions of the SDK prior to 1.0.9, which includes the dialog directives.
-
-
-
- // 1. Text strings =====================================================================================================
- //    Modify these strings and messages to change the behavior of your Lambda function
- 
+//Authors: Sonja Goehrlich, Valentin Schrader (v.schrader@tum.de)
 
 var reprompt;
 var welcomeOutput=['Willkommen! Wie kann ich Ihnen helfen?', 'Hallo! Womit kann ich Ihnen behilflich sein', 'Wobei brauchen Sie Hilfe','Sagen Sie mir, mit was ich Ihnen helfen kann']; 
@@ -21,10 +13,6 @@ var welcomeOutput=['Willkommen! Wie kann ich Ihnen helfen?', 'Hallo! Womit kann 
 var Alexa = require('alexa-sdk');
 var AWS = require("aws-sdk");
 const AWSregion = 'eu-west-1';
-//var dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-//var doc = require('dynamodb-doc');
-//var dynamodb = new doc.DynamoDB();
-//var docClient = new AWS.DynamoDB.DocumentClient();
 var APP_ID =  "amzn1.ask.skill.f6c652ad-92b8-4c79-a29a-3bd683d582ed";
 var userId;
 var speechOutput = '';
@@ -36,31 +24,31 @@ var handlers = {
     },
     'AMAZON.HelpIntent': function () {
         speechOutput = 'Bitte sagen Sie mir, wobei Sie Hilfe benötigen. Ich werde Ihre Anfrage an den Pfleger weiterleiten.';
-        reprompt = 'Beispiels Anfragen sind: Bitte helfe mir auf die Toilette! Ich kann meinen Fernseher nicht anschalten. Bitte schließe mein Fenster.';
+        reprompt = 'Sie können beispielsweise sagen: Bitte helfe mir auf die Toilette! Oder Sie sagen: Ich kann meinen Fernseher nicht anschalten. Eine weitere möglichkeit ist: Bitte schließe mein Fenster.';
         this.emit(':ask', speechOutput, reprompt);
     },
     'AMAZON.CancelIntent': function () {
-        speechOutput = ["Drücken Sie den Knopf, wenn Sie wieder Hilfe benötigen","Wenn Sie Hilfe benötigen, können Sie einfach auf den Knopf drücken",
-                        "Wenn Sie Hilfe vom Pflegepersonal benötigen, betätigen Sie den Knopf und formulieren Ihre Anfrage","Drücken Sie den Knopf oder sagen Sie meinen Namen Alexa, wenn Sie wieder Hilfe benötigen!"];
+        speechOutput = ["Drücken Sie den Knopf, wenn Sie wieder Hilfe benötigen.","Wenn Sie Hilfe benötigen, können Sie einfach auf den Knopf drücken.",
+                        "Wenn Sie Hilfe vom Pflegepersonal benötigen, betätigen Sie den Knopf und formulieren Ihre Anfrage.","Drücken Sie den Knopf oder sagen Sie meinen Namen Alexa, wenn Sie wieder Hilfe benötigen!"];
         var speechOutputRandomized=randomPhrase(speechOutput);                
         this.emit(':tell', speechOutputRandomized);
     },
     'AMAZON.StopIntent': function () {
-        speechOutput = ["Drücken Sie den Knopf, wenn Sie wieder Hilfe benötigen","Wenn Sie Hilfe benötigen, können Sie einfach auf den Knopf drücken",
-                        "Wenn Sie Hilfe vom Pflegepersonal benötigen, betätigen Sie den Knopf und formulieren Ihre Anfrage","Drücken Sie den Knopf oder sagen Sie meinen Namen Alexa, wenn Sie wieder Hilfe benötigen!"];
+        speechOutput = ["Drücken Sie den Knopf, wenn Sie wieder Hilfe benötigen.","Wenn Sie Hilfe benötigen, können Sie einfach auf den Knopf drücken.",
+                        "Wenn Sie Hilfe vom Pflegepersonal benötigen, betätigen Sie den Knopf und formulieren Ihre Anfrage.","Drücken Sie den Knopf oder sagen Sie meinen Namen Alexa, wenn Sie wieder Hilfe benötigen!"];
         var speechOutputRandomized=randomPhrase(speechOutput);                
         this.emit(':tell', speechOutputRandomized);
     },
     'AMAZON.YesIntent': function () {
         if (anfrage.inhalt == "Notfall"){
             putDynamoItem(anfrage.prioritaet,anfrage.inhalt, ()=>{
-            speechOutput = "Der Notfall wurde an den Pfleger weitergeleitet";
+            speechOutput = "Der Notfall wurde an den Pfleger weitergeleitet.";
             this.emit(":tell", speechOutput);
             }); 
         }
         else {
             putDynamoItem(anfrage.prioritaet,anfrage.inhalt, ()=>{
-            var input = ["Das freut mich!","Ok!","Sehr gut!"];
+            var input = ["Verstanden.","Ok!"];
             var speechOutput=randomPhrase(input);
             this.emit(":tell", speechOutput);
             }); 
@@ -74,22 +62,18 @@ var handlers = {
             }); 
         }
         else {
-            var input=["Das tut mir sehr Leid, bitte wiederholen Sie Ihre Anfrage!","Bitte wiederholen Sie Ihre Anfrage!","ok. Bitte wiederholen Sie Ihr Problem."];
+            var input=["Das tut mir sehr Leid, bitte wiederholen Sie Ihre Anfrage!","Bitte wiederholen Sie Ihre Anfrage!","Ok. Bitte wiederholen Sie Ihr Problem."];
             speechOutput = randomPhrase(input);
             this.emit(":ask", speechOutput, speechOutput);
         }
     },
     'SessionEndedRequest': function () {
         speechOutput = '';
-        //this.emit(':saveState', true);//uncomment to save attributes to db on session end
         this.emit(':tell', speechOutput);
     },
     "Dinge_im_Zimmer_schliessen": function () {
         var speechOutput = "";
-        //any intent slot variables are listed here for convenience
-
-        //Your custom intent handling goes here
-        var input = ["Ein Pfleger wird sich bald um Ihr Fenster oder Tür kümmern.","Ein Pfleger wird bald vorbeikommen, um sich um Ihre Tür oder Fenster zu kümmern."];
+        var input = ["Ein Pfleger wird sich bald um Ihr Fenster oder Ihre Tür kümmern.","Ein Pfleger wird bald vorbeikommen, um sich um Ihre Tür oder Ihr Fenster zu kümmern."];
         speechOutput=randomPhrase(input);
         speechOutput+=" "+nachfrage();
         anfrage.inhalt="Fenster oder Tür";
@@ -99,7 +83,6 @@ var handlers = {
     "Medikamente": function () {
         var speechOutput = "";
         var input="";
-        //any intent slot variables are listed here for convenience
         var MedizinSlotRaw = this.event.request.intent.slots.Medizin.value;
         console.log(MedizinSlot);
         var MedizinSlot = resolveCanonical(this.event.request.intent.slots.Medizin);
@@ -143,9 +126,6 @@ var handlers = {
     },
     "Toilette": function () {
         var speechOutput;
-        //any intent slot variables are listed here for convenience
-
-        //Your custom intent handling goes here
         var input=["Ich habe Ihre Anfrage, dass Sie auf die Toilette müssen, an den Pfleger weitergeleitet.","Der Pfleger weiß Bescheid, dass Sie auf die Toilette müssen.",
                     "Ein Pfleger wird bald da sein, um Ihnen zu helfen, auf die Toilette zu gehen."];
         speechOutput=randomPhrase(input);
@@ -156,9 +136,6 @@ var handlers = {
     },
     "Bett": function () {
         var speechOutput;
-        //any intent slot variables are listed here for convenience
-
-        //Your custom intent handling goes here
         var input=["Ich habe Ihre Anfrage, dass Sie das Bett verlassen möchten, an den Pfleger weitergeleitet.", "Der Pfleger kommt gleich, um Ihnen zu helfen, aus dem Bett zu kommen.",
                     "Der Pfleger weiß Bescheid. Er wird bald vorbeikommen, um Ihnen aus dem Bett zu helfen."];
         speechOutput=randomPhrase(input);
@@ -169,10 +146,7 @@ var handlers = {
     },
     "Bewegungshilfe": function () {
         var speechOutput;
-        //any intent slot variables are listed here for convenience
-
-        //Your custom intent handling goes here
-        var input=["Ich habe Ihre Anfrage, dass Sie Ihre Gehhilfe benötigen weitergeleitet.", "Ihre Gehhilfe wird Ihnen bald gebracht!.",
+        var input=["Ich habe Ihre Anfrage, dass Sie Ihre Gehhilfe benötigen weitergeleitet.", "Ihre Gehhilfe wird Ihnen bald gebracht!",
                     "Der Pfleger weiß Bescheid. Er wird Ihnen bald Ihre Bewegungshilfe bringen."];
         speechOutput=randomPhrase(input);
         speechOutput+=" "+nachfrage();
@@ -183,9 +157,7 @@ var handlers = {
     "Notfall": function () {
         //sendSMS("Person X in Raum Y hat einen Notfall");
         var speechOutput;
-        //any intent slot variables are listed here for convenience
         var input=["Ist es ein Notfall?"];
-        //Your custom intent handling goes here
         speechOutput=randomPhrase(input);
         anfrage.inhalt="Notfall";
         anfrage.prioritaet="1";
@@ -214,10 +186,6 @@ var handlers = {
     }, */ 
     "Fernseher": function () {
         var speechOutput;
-        //pushDynamoDB("low","Fernseher",this);
-		//var request = {priority:"high",content:"Fernseher",time:"10:23"};
-		//this.attributes['request'] = request; 
-		//createItemDynamoDb("high","Fernseher");
 		var input=["Ein Pfleger wird bald hier sein, um sich um den Fernseher zu kümmern.","Bald kommt jemand vorbei, um sich um Ihren Fernseher zu kümmern.",
 		            "Hilfe für Ihren Fernseher kommt bald."];
 		speechOutput=randomPhrase(input);
@@ -236,7 +204,6 @@ var handlers = {
 
 exports.handler = function(event, context, callback) {
     var alexa = Alexa.handler(event, context);
-
     alexa.appId = APP_ID
     userId = event['session']['user']['userId'];
     alexa.registerHandlers(handlers);
@@ -293,32 +260,6 @@ function firstCap(string)
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-/*
-function createItemDynamoDb(priority,content) {
-	var date = new Date();
-	var timestamp = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-	var requestId = userId + "." + timestamp
-	console.log("requestId:" + requestId);
-	var params = {
-		TableName: "Requests",
-		Item: {
-			requestId: requestId,
-			priority: priority,
-			content: content,
-			timestamp: timestamp
-			}
-		};
-	docClient.put(params,function(err,data){
-		if(err){
-			console.log("An error occured");
-			console.error(err);
-		}else {
-			console.log("Put item sucessfully to DynamoDB.");
-			console.log(data);
-		}
-	});
-} 
-*/
 //sendSMS via SNS
 function sendSMS(message){
     var sns = new AWS.SNS();
