@@ -1,9 +1,10 @@
 /* This code has been generated from your interaction model
+/* based on skillinator.io
 
 /* eslint-disable  func-names */
 /* eslint quote-props: ["error", "consistent"]*/
 
-//Authors: Sonja Goehrlich, Valentin Schrader (v.schrader@tum.de)
+//Authors: Sonja Goehrlich (sonja.goerlich@aol.de), Valentin Schrader (v.schrader@tum.de)
 
 var reprompt;
 var welcomeOutput=['Willkommen! Wie kann ich Ihnen helfen?', 'Hallo! Womit kann ich Ihnen behilflich sein', 'Wobei brauchen Sie Hilfe','Sagen Sie mir, mit was ich Ihnen helfen kann']; 
@@ -163,27 +164,7 @@ var handlers = {
         anfrage.prioritaet="1";
         this.emit(":ask",speechOutput);
     },
-   /*"Verbindung_mit_Pfleger": function () {
-        var speechOutput = "";
-        //any intent slot variables are listed here for convenience
-        var PflegerSlotRaw = this.event.request.intent.slots.Pfleger.value;
-        console.log(PflegerSlotRaw);
-        var PflegerSlot = resolveCanonical(this.event.request.intent.slots.Pfleger);
-        console.log(PflegerSlot);
-        if (PflegerSlotRaw == 'krankenschwester' || PflegerSlotRaw == 'pflegerin' || PflegerSlotRaw == 'schwester' ) {
-           speechOutput="Die Verbindung zur" +PflegerSlot+ "wird hergestellt"; 
-        }
-        else if (PflegerSlotRaw == 'pfleger')
-            speechOutput="Die Verbindung zum" +PflegerSlot+ "wird hergestellt";
-        else if (PflegerSlotRaw == 'arzt' || PflegerSlotRaw == 'ärztin'){
-            var input=["Ich verbinde dich mit jemandem aus dem Pflegepersonal. Diese Person wird alles weitere mit dir besprechen", "Die Verbindung zum Pflegerpersonal wird hergestellt. Sie werden die weiterhelfen"];
-            speechOutput=randomPhrase(input);
-        }
-        else
-            speechOutput="Die Verbindung zum Pflegepersonal wird aufgebaut";
-        //Your custom intent handling goes here
-        this.emit(":ask", speechOutput, speechOutput);
-    }, */ 
+    
     "Fernseher": function () {
         var speechOutput;
 		var input=["Ein Pfleger wird bald hier sein, um sich um den Fernseher zu kümmern.","Bald kommt jemand vorbei, um sich um Ihren Fernseher zu kümmern.",
@@ -194,6 +175,7 @@ var handlers = {
         anfrage.prioritaet="3";
         this.emit(":ask",speechOutput);
     },
+    
     'Unhandled': function () {
         putDynamoItem("1","Unknown", ()=>{
             speechOutput = "Ich habe leider nicht verstanden, wobei Sie Hilfe benötigen. Der Pfleger weiß jedoch Bescheid, dass Sie Hilfe benötigen.";
