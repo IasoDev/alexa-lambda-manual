@@ -88,7 +88,7 @@ var handlers = {
         var MedizinSlot = resolveCanonical(this.event.request.intent.slots.Medizin);
         console.log(MedizinSlot);
         if (MedizinSlotRaw == 'hustensaft' || MedizinSlotRaw == 'trank' || MedizinSlotRaw == 'zaubertrank' ) {
-            input=["Ein Pfleger wird Ihnen Ihren" +MedizinSlot+ "bringen.","Ihr" +MedizinSlot+ "wird Ihnen bald gebracht.","Der" +MedizinSlot+ "wird gleich gebracht."];    
+            input=["Ein Pfleger wird Ihnen Ihren " +MedizinSlot+ " bringen.","Ihr " +MedizinSlot+ " wird Ihnen bald gebracht.","Der " +MedizinSlot+ " wird gleich gebracht."];    
             speechOutput=randomPhrase(input);
             speechOutput+=" "+nachfrage();
             var capitalized=firstCap(MedizinSlotRaw);
@@ -106,7 +106,7 @@ var handlers = {
             this.emit(":ask",speechOutput);
         }
         else if (MedizinSlotRaw == 'schmerzmittel' || MedizinSlotRaw == 'aspirin' || MedizinSlotRaw == 'heilmittel' || MedizinSlotRaw == 'arzneimittel' || MedizinSlotRaw == 'therapeutikum'){
-            input=["Ein Pfleger wird Ihnen Ihr" +MedizinSlotRaw+ "bringen.","Ihr" +MedizinSlotRaw+ "wird Ihnen bald gebracht.","Das" +MedizinSlotRaw+ "wird gleich gebracht."];
+            input=["Ein Pfleger wird Ihnen Ihr " +MedizinSlotRaw+ " bringen.","Ihr " +MedizinSlotRaw+ " wird Ihnen bald gebracht.","Das " +MedizinSlotRaw+ " wird gleich gebracht."];
             speechOutput=randomPhrase(input);
             speechOutput+=" "+nachfrage();
             capitalized=firstCap(MedizinSlotRaw);
